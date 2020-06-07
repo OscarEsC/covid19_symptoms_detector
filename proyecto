@@ -76,33 +76,58 @@ def show_slice_mask(slicei, mask): #mostrar la mascara y la imagen
 
 def glcm_properties(image): #recibe la imagen
     glcm = greycomatrix(image, distances = [1,2], angles = [0,-np.pi/2],symmetric=True, normed=True)
-    print("Energia ",greycoprops(glcm, 'energy'))
-    print("Homogeneidad ",greycoprops(glcm, 'homogeneity'))
-    print("Contraste ",greycoprops(glcm, 'contrast'))
-    
-    # Returning determinat for every matrix in order to work just with
-    # 1-D arrays
-    #return [resultadosEnergy, resultadosHomogeneity, resultadosContrast]
+    Energia = greycoprops(glcm, 'energy')
+    Homo = greycoprops(glcm, 'homogeneity')
+    Contraste = greycoprops(glcm, 'contrast')
+    print("E",Energia)
+    print("H",Homo)
+    print("C",Contraste)
+    return [Energia,Homo,Contraste]
 
 def main(): #función principal
     to_show = 3 
     imgs = nib.load(images_filename).get_fdata() #leemos el conjunto de imagenes
     masks = nib.load(masks_filename).get_fdata() #leemos el conjunto de mascáras
-
+    energiaPro = np.zeros((2,2))
+    homogeneidadPro = np.zeros ((2,2))
+    contrastePro = np.zeros ((2,2))
+    numEne = 0
+    numHomo = 0
+    numCon = 0
     for x in range(25, 25+to_show): #Ciclo para iterar las imagenes
         print("Image no ", x) #mensaje del número de imagen
         classes = get_vals(masks[:,:,x]) #Obtenemos los valores que tienen las mascáras
-        print(classes)
         show_slice_mask(imgs[:,:,x], masks[:,:,x]) #mostrar imagen y mascara
         for j in classes: #para mostrar el número de clases encontradas
             #tmp es la mascara aplicada y matrix sus pixeles
             tmp, matrix_mask = apply_mask(imgs[:,:,x], masks[:,:,x], j)
             print("class ", j)
-            #show_slice_mask(tmp, masks[:,:,x])
-            show_slice_mask(tmp, matrix_mask) #mostrar la mascara aplicada y sus pixeles
-            glcm_properties(matrix_mask.astype(np.uint8))
-            #create_matrix(tmp)
-        #print(get_prop(imgs[:,:,x].astype(np.uint8), masks[:,:,x].astype(np.uint8)))
-        #get_every_mask(imgs[:,:,x], masks[:,:,x])
+            show_slice_mask(tmp, masks[:,:,x])
+            #show_slice_mask(tmp, matrix_mask) #mostrar la mascara aplicada y sus pixeles
+            Energia, Homogeneidad, Contraste = glcm_properties(matrix_mask.astype(np.uint8))
+            if j == 1:
+                numEne =numEne + 1
+                for i in range(2):
+                    for l in range(2):
+                        energiaPro[i][l] = Energia[i][l]+energiaPro[i][l]              
+            if j == 2:
+                numHomo =numHomo+ 1
+                for i in range(2):
+                    for l in range(2):
+                        homogeneidadPro[i][l] = Homogeneidad[i][l]+ homogeneidadPro[i][l]        
+            if j == 3:
+                numCon =numCon+ 1
+                for i in range(2):
+                    for l in range(2):
+                        contrastePro[i][l] = Contraste[i][l]+ contrastePro[i][l]
+                        
+    for i in range(2):
+        for l in range(2):
+            energiaPro[i][l] = (energiaPro[i][l]/numEne)
+            homogeneidadPro[i][l] = (homogeneidadPro[i][l]/numHomo)
+            contrastePro[i][l] = (contrastePro[i][l]/numCon)
+    print(numEne,energiaPro)
+    print(numHomo,homogeneidadPro)
+    print(numCon,contrastePro)
 
 main()
