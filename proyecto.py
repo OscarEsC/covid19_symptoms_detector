@@ -107,7 +107,7 @@ def main(): #función principal
         for j in classes: #para mostrar el número de clases encontradas
             #tmp es la mascara aplicada y matrix sus pixeles
             tmp, matrix_mask = apply_mask(imgs[:,:,x], masks[:,:,x], j)
-            #print("class ", j)
+            print("class ", j)
             #show_slice_mask(tmp, masks[:,:,x])
             #show_slice_mask(tmp, matrix_mask) #mostrar la mascara aplicada y sus pixeles
             Energia, Corre, Contraste = glcm_properties(matrix_mask.astype(np.uint8))
@@ -138,9 +138,9 @@ def main(): #función principal
             energiaC1[i][l] = energiaC1[i][l]/numC1
             correC1[i][l] = correC1[i][l]/numC1
             contrasteC1[i][l] = contrasteC1[i][l]/numC1
-            energiaC2[i][l] = energiaC3[i][l]/numC2
-            correC2[i][l] = correC3[i][l]/numC2
-            contrasteC2[i][l] = contrasteC3[i][l]/numC2
+            energiaC2[i][l] = energiaC2[i][l]/numC2
+            correC2[i][l] = correC2[i][l]/numC2
+            contrasteC2[i][l] = contrasteC2[i][l]/numC2
             energiaC3[i][l] = energiaC3[i][l]/numC3
             correC3[i][l] = correC3[i][l]/numC3
             contrasteC3[i][l] = contrasteC3[i][l]/numC3
@@ -153,5 +153,4 @@ def main(): #función principal
     print("E3",numC3,energiaC3)
     print("C3",numC3,correC3)
     print("Co3",numC3,contrasteC3)
-
 main()
