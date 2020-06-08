@@ -75,59 +75,83 @@ def show_slice_mask(slicei, mask): #mostrar la mascara y la imagen
     plt.show()
 
 def glcm_properties(image): #recibe la imagen
-    glcm = greycomatrix(image, distances = [1,2], angles = [0,-np.pi/2],symmetric=True, normed=True)
+    glcm = greycomatrix(image, distances = [1,2,3], angles = [0, np.pi/4, np.pi/2],symmetric=True, normed=True)
     Energia = greycoprops(glcm, 'energy')
-    Homo = greycoprops(glcm, 'homogeneity')
+    Corre = greycoprops(glcm, 'correlation')
     Contraste = greycoprops(glcm, 'contrast')
-    print("E",Energia)
-    print("H",Homo)
-    print("C",Contraste)
-    return [Energia,Homo,Contraste]
+    #print("E",Energia)
+    #print("H",Corre)
+    #print("C",Contraste)
+    return [Energia,Corre,Contraste]
 
 def main(): #función principal
     to_show = 3 
     imgs = nib.load(images_filename).get_fdata() #leemos el conjunto de imagenes
     masks = nib.load(masks_filename).get_fdata() #leemos el conjunto de mascáras
-    energiaPro = np.zeros((2,2))
-    homogeneidadPro = np.zeros ((2,2))
-    contrastePro = np.zeros ((2,2))
-    numEne = 0
-    numHomo = 0
-    numCon = 0
-    for x in range(25, 25+to_show): #Ciclo para iterar las imagenes
+    energiaC1 = np.zeros((3,3))
+    correC1 = np.zeros ((3,3))
+    contrasteC1 = np.zeros ((3,3))
+    energiaC2 = np.zeros((3,3))
+    correC2 = np.zeros ((3,3))
+    contrasteC2 = np.zeros ((3,3))
+    energiaC3 = np.zeros((3,3))
+    correC3 = np.zeros ((3,3))
+    contrasteC3 = np.zeros ((3,3))
+    numC1 = 0
+    numC2 = 0
+    numC3 = 0
+    for x in range(100): #Ciclo para iterar las imagenes
         print("Image no ", x) #mensaje del número de imagen
         classes = get_vals(masks[:,:,x]) #Obtenemos los valores que tienen las mascáras
         show_slice_mask(imgs[:,:,x], masks[:,:,x]) #mostrar imagen y mascara
         for j in classes: #para mostrar el número de clases encontradas
             #tmp es la mascara aplicada y matrix sus pixeles
             tmp, matrix_mask = apply_mask(imgs[:,:,x], masks[:,:,x], j)
-            print("class ", j)
-            show_slice_mask(tmp, masks[:,:,x])
+            #print("class ", j)
+            #show_slice_mask(tmp, masks[:,:,x])
             #show_slice_mask(tmp, matrix_mask) #mostrar la mascara aplicada y sus pixeles
-            Energia, Homogeneidad, Contraste = glcm_properties(matrix_mask.astype(np.uint8))
+            Energia, Corre, Contraste = glcm_properties(matrix_mask.astype(np.uint8))
             if j == 1:
-                numEne =numEne + 1
-                for i in range(2):
-                    for l in range(2):
-                        energiaPro[i][l] = Energia[i][l]+energiaPro[i][l]              
+                numC1 =numC1 + 1
+                for i in range(3):
+                    for l in range(3):
+                        energiaC1[i][l] = energiaC1[i][l]+Energia[i][l] 
+                        correC1[i][l] = correC1[i][l]+Corre[i][l] 
+                        contrasteC1[i][l] = contrasteC1[i][l]+Contraste[i][l] 
             if j == 2:
-                numHomo =numHomo+ 1
-                for i in range(2):
-                    for l in range(2):
-                        homogeneidadPro[i][l] = Homogeneidad[i][l]+ homogeneidadPro[i][l]        
+                numC2 =numC2+ 1
+                for i in range(3):
+                    for l in range(3):
+                        energiaC2[i][l] = energiaC2[i][l]+Energia[i][l] 
+                        correC2[i][l] = correC2[i][l]+Corre[i][l] 
+                        contrasteC2[i][l] = contrasteC2[i][l]+Contraste[i][l]       
             if j == 3:
-                numCon =numCon+ 1
-                for i in range(2):
-                    for l in range(2):
-                        contrastePro[i][l] = Contraste[i][l]+ contrastePro[i][l]
+                numC3 =numC3+ 1
+                for i in range(3):
+                    for l in range(3):
+                        energiaC3[i][l] = energiaC3[i][l]+Energia[i][l] 
+                        correC3[i][l] = correC3[i][l]+Corre[i][l] 
+                        contrasteC3[i][l] = contrasteC3[i][l]+Contraste[i][l]
                         
-    for i in range(2):
-        for l in range(2):
-            energiaPro[i][l] = (energiaPro[i][l]/numEne)
-            homogeneidadPro[i][l] = (homogeneidadPro[i][l]/numHomo)
-            contrastePro[i][l] = (contrastePro[i][l]/numCon)
-    print(numEne,energiaPro)
-    print(numHomo,homogeneidadPro)
-    print(numCon,contrastePro)
+    for i in range(3):
+        for l in range(3):
+            energiaC1[i][l] = energiaC1[i][l]/numC1
+            correC1[i][l] = correC1[i][l]/numC1
+            contrasteC1[i][l] = contrasteC1[i][l]/numC1
+            energiaC2[i][l] = energiaC3[i][l]/numC2
+            correC2[i][l] = correC3[i][l]/numC2
+            contrasteC2[i][l] = contrasteC3[i][l]/numC2
+            energiaC3[i][l] = energiaC3[i][l]/numC3
+            correC3[i][l] = correC3[i][l]/numC3
+            contrasteC3[i][l] = contrasteC3[i][l]/numC3
+    print("E1",numC1,energiaC1)
+    print("C1",numC1,correC1)
+    print("Co1",numC1,contrasteC1)
+    print("E2",numC2,energiaC2)
+    print("C2",numC2,correC2)
+    print("Co2",numC2,contrasteC2)
+    print("E3",numC3,energiaC3)
+    print("C3",numC3,correC3)
+    print("Co3",numC3,contrasteC3)
 
 main()
